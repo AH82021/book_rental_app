@@ -10,6 +10,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +38,9 @@ public class BookController {
 // DTO
 
     @GetMapping
-    public ResponseEntity<List<BookResponse>> getAllBooks() {
+    public ResponseEntity<Page<BookResponse>> getAllBooks(@PageableDefault(size = 20, sort ="title") Pageable  pageable) {
 
-        List<BookResponse> books = bookService.findAllBooks();
+        Page<BookResponse> books = bookService.findAllBooks(pageable);
         return  ResponseEntity.ok().body(books);
     }
 
@@ -60,6 +63,15 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<BookResponse>> searchBooks(
+            @RequestParam String keyword,
+            @PageableDefault(size = 20, sort ="title") Pageable  pageable) {
+ log.debug("Received search request with keyword: {} and pagination: {}", keyword, pageable);
+        Page<BookResponse> books = bookService.searchBooks(keyword, pageable);
+        return  ResponseEntity.ok().body(books);
+    }
 
 
 }

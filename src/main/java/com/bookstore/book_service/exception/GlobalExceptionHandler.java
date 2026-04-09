@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
 
 @ExceptionHandler(MethodArgumentNotValidException.class)
-public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
+public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
     log.error("Validation error: {}", ex.getMessage());
 
     Map<String, String> errors = new HashMap<>();
@@ -46,6 +46,26 @@ public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNo
     return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 
 }
+
+
+@ExceptionHandler(ResourceNotFoundException.class)
+public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
+    log.error("Resource not found: {}", ex.getMessage());
+
+
+    ErrorResponse errorResponse = ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.NOT_FOUND.value())
+            .error("Resource Not Found")
+            .message(ex.getMessage())
+            .path(request.getDescription(false).replace("uri=", ""))
+            .build();
+
+
+    return   ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+
+}
+
 
 
 }
