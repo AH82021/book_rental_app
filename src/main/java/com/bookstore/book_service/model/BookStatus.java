@@ -21,19 +21,3 @@ public enum BookStatus {
 
 
 
-/*{
-    "title": "Harry Potter",
-    "author": "J.K. Rowling",
-    "isbn": "9780439708180",
-    "description": "A young wizard's journey",
-    "price": 19.99,
-    "rentalPrice": 4.99,
-    "publicationDate": "1997-06-26",
-    "publisher": "Bloomsbury",
-    "pages": 223,
-    "language": "English",
-    "coverImageUrl": "https://example.com/hp.jpg",
-    "status": "AVAILABLE",
-    "totalCopies": 10,
-    "availableCopies": 10
-}*/
