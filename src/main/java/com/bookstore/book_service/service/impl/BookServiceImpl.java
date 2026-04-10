@@ -5,6 +5,7 @@ import com.bookstore.book_service.dto.BookResponse;
 import com.bookstore.book_service.exception.ResourceNotFoundException;
 import com.bookstore.book_service.mapper.BookMapper;
 import com.bookstore.book_service.model.Book;
+import com.bookstore.book_service.model.BookStatus;
 import com.bookstore.book_service.repository.BookRepository;
 import com.bookstore.book_service.service.BookService;
 import lombok.AllArgsConstructor;
@@ -14,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
@@ -59,6 +62,9 @@ private final BookMapper  bookMapper;
 
     }
 
+
+    @Transactional(readOnly = true)
+
     @Override
     public Page<BookResponse> searchBooks(String keyword, Pageable pageable) {
         log.info("search for  books  with keyword:{} and pagination:{} ", keyword, pageable);
@@ -69,5 +75,18 @@ private final BookMapper  bookMapper;
         return books.map(bookMapper::toResponse);
 
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BookResponse> advancedSearch(String title, String author, String isbn,
+                                             Long categoryId, BookStatus status, BigDecimal minPrice,
+                                             BigDecimal maxPrice, String publisher, String language,
+                                             Boolean available, Pageable pageable) {
+        log.info("Advanced search for books with title:{}, author:{}, status:{}", title, author, status);
+        Page<Book> books = bookRepository.searchBooks(
+                title, author, isbn, categoryId, status,
+                minPrice, maxPrice, publisher, language, available, pageable);
+        return books.map(bookMapper::toResponse);
     }
 }

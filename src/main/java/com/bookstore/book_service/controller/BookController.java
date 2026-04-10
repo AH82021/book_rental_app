@@ -4,6 +4,7 @@ package com.bookstore.book_service.controller;
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
 import com.bookstore.book_service.model.Book;
+import com.bookstore.book_service.model.BookStatus;
 import com.bookstore.book_service.service.BookService;
 import com.bookstore.book_service.service.impl.BookServiceImpl;
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 // localhost:8080/api/v1/books/6
@@ -73,5 +75,27 @@ public class BookController {
         return  ResponseEntity.ok().body(books);
     }
 
-
+    @GetMapping("/search/advanced")
+    public ResponseEntity<Page<BookResponse>> advancedSearch(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BookStatus status,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String publisher,
+            @RequestParam(required = false) String language,
+            @RequestParam(required = false) Boolean available,
+            @PageableDefault(size = 20, sort = "title") Pageable pageable) {
+        log.debug("Received advanced search request with title:{}, author:{}, status:{}", title, author, status);
+        Page<BookResponse> books = bookService.advancedSearch(
+                title, author, isbn, categoryId, status,
+                minPrice, maxPrice, publisher, language, available, pageable
+        );
+        return ResponseEntity.ok().body(books);
+    }
 }
+
+
+// Repository    →    Service Interface   →     ServiceImpl   →    Controller  →  Testing
