@@ -7,6 +7,8 @@ import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
 import com.bookstore.book_service.service.BookService;
 import com.bookstore.book_service.service.impl.BookServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-// localhost:8080/api/v1/books/6
-// Request > Controller => Service => Repository(Model) => DB
-// Repository(Model) => Service => Controller => Response
+
 
 @RestController
 @RequiredArgsConstructor
@@ -31,13 +31,11 @@ import java.util.List;
 @RequestMapping("/api/v1/books")
 
 public class BookController {
-    // Inversion of Control (IoC) => Spring Framework
-    // DI : Dependency Injection : is a technique where a class receives its dependencies from an external source rather than creating them itself.
-//  Types : Constructor , Setter , Field
+
 
     private final BookService bookService  ;
 
-// DTO
+
 
     @GetMapping
     public ResponseEntity<Page<BookResponse>> getAllBooks(@PageableDefault(size = 20, sort ="title") Pageable  pageable) {
@@ -48,7 +46,10 @@ public class BookController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookResponse> getBookById(@PathVariable Long id){
+    @Operation(summary = "Get book by ID", description = "Returns a single book by its ID. The book must not be marked as deleted.")
+    public ResponseEntity<BookResponse> getBookById(
+            @Parameter(description = "ID of the book to retrieve", example = "1")
+            @PathVariable Long id){
 
         BookResponse book = bookService.getBookById(id);
         return  ResponseEntity.ok().body(book);
@@ -98,4 +99,3 @@ public class BookController {
 }
 
 
-// Repository    →    Service Interface   →     ServiceImpl   →    Controller  →  Testing
