@@ -89,4 +89,20 @@ private final BookMapper  bookMapper;
                 minPrice, maxPrice, publisher, language, available, pageable);
         return books.map(bookMapper::toResponse);
     }
+
+    @Override
+    public void deleteBookById(Long Id) {
+        log.debug("Deleting Book by ID:{}", Id);
+        Book book = findBookByIdOrThrow(Id);
+        book.softDelete();
+        bookRepository.save(book);
+        log.info("Deleted Book with Id:{}",Id);
+    }
+    // helper method
+    private Book findBookByIdOrThrow(Long Id){
+        return bookRepository.findByIdAndDeletedFalse(Id)
+                .orElseThrow(()-> new ResourceNotFoundException("Book not found with Id"+ Id));
+
+    }
+
 }
