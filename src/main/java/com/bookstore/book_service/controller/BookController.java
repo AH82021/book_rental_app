@@ -9,6 +9,8 @@ import com.bookstore.book_service.service.BookService;
 import com.bookstore.book_service.service.impl.BookServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,6 +98,21 @@ public class BookController {
         );
         return ResponseEntity.ok().body(books);
     }
+    @DeleteMapping("/{Id}")
+    @Operation(summary = "Delete book by ID", description = "Soft Delete a book by marking it as deleted.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",description = "Book deleted Successfully"),
+            @ApiResponse(responseCode = "404",description = "Book Not Found")
+    })
+    public ResponseEntity<Void> deleteBookById(@Parameter(description = "Book deleted by ID", example = "1")
+                                                   @PathVariable Long Id){
+        log.info("Deleting book by ID:{}", Id);
+        bookService.deleteBookById(Id);
+        return ResponseEntity.noContent().build();
+
+
+    }
+
 }
 
 

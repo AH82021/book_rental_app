@@ -27,4 +27,6 @@ public interface BookService {
                                    BigDecimal maxPrice, String publisher, String language,
                                    Boolean available, Pageable pageable);
 
+    void deleteBookById(Long Id);
+
 }
