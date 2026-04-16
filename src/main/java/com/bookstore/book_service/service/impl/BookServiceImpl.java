@@ -47,9 +47,6 @@ private final BookMapper  bookMapper;
         Page<Book> books = bookRepository.findByDeletedFalse(pageable);
 
         return  books.map(bookMapper::toResponse);
-// return bookRepository.findAll().stream()
-//         .map(bookMapper::toResponse)
-//         .toList();
 
     }
 
@@ -69,6 +66,81 @@ private final BookMapper  bookMapper;
 
      return bookMapper.toResponse(book);
 
+    }
+
+    @Override
+    public BookResponse getBookByIsbn(String isbn) {
+        return null;
+    }
+
+    @Override
+    public Page<BookResponse> getBooksByCategory(Long categoryId, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookResponse> getAvailableBooks(Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<BookResponse> getLowStockBooks(int threshold, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public BookResponse updateInventory(Long id, Integer totalCopies, Integer availableCopies) {
+        return null;
+    }
+
+    @Override
+    public BookResponse reserveCopies(Long id, Integer quantity) {
+        return null;
+    }
+
+    @Override
+    public BookResponse releaseCopies(Long id, Integer quantity) {
+        return null;
+    }
+
+    @Override
+    public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
+        return null;
+    }
+
+    @Override
+    public BookResponse removeCategoriesFromBook(Long bookId, Set<Long> categoryIds) {
+        return null;
+    }
+
+    @Override
+    public List<BookResponse> getFeaturedBooks(int limit) {
+        return List.of();
+    }
+
+    @Override
+    public List<BookResponse> getLatestBooks(int limit) {
+        return List.of();
+    }
+
+    @Override
+    public boolean existsByIsbn(String isbn) {
+        return false;
+    }
+
+    @Override
+    public long getTotalBookCount() {
+        return 0;
+    }
+
+    @Override
+    public long getBookCountByStatus(BookStatus status) {
+        return 0;
+    }
+
+    @Override
+    public long getBookCountByCategory(Long categoryId) {
+        return 0;
     }
 
 
@@ -140,7 +212,7 @@ private final BookMapper  bookMapper;
 
     }
         @Override
-        public Page<BookResponse> getBookByStatus (BookStatus status, Pageable pageable){
+        public Page<BookResponse> getBooksByStatus (BookStatus status, Pageable pageable){
 
             log.debug("Fetching book by status: {}", status);
             Page<Book> books = bookRepository.findByStatusAndDeletedFalse(status, pageable);

@@ -55,7 +55,7 @@ public class BookController {
     })
 
     public ResponseEntity<Page<BookResponse>> getBooksByStatus  ( @Parameter(description = "Book Status") @PathVariable BookStatus status, @PageableDefault(size = 20, sort= "title") Pageable pageable) {
-      Page<BookResponse> books = bookService.getBookByStatus(status, pageable);
+      Page<BookResponse> books = bookService.getBooksByStatus(status, pageable);
       return  ResponseEntity.ok(books);
     }
 
