@@ -136,36 +136,37 @@ private final BookMapper  bookMapper;
         // Update basic fields
         bookMapper.updateEntity(existingBook, request);
 
-        // Update categories if provided
-        if (request.getCategoryIds() != null) {
-            if (request.getCategoryIds().isEmpty()) {
-                existingBook.getCategories().clear();
-            } else {
-                Set<Category> categories = categoryRepository.findAllById(request.getCategoryIds())
-                        .stream().collect(Collectors.toSet());
-                existingBook.setCategories(categories);
+        return bookMapper.toResponse(existingBook);
+
+    }
+        @Override
+        public Page<BookResponse> getBookByStatus (BookStatus status, Pageable pageable){
+
+            log.debug("Fetching book by status: {}", status);
+            Page<Book> books = bookRepository.findByStatusAndDeletedFalse(status, pageable);
+            log.info("Fetching books with pagination:{} ", books);
+            return books.map(bookMapper::toResponse);
+        }
+
+        // helper method
+        private Book findBookByIdOrThrow (Long Id) {
+            return bookRepository.findByIdAndDeletedFalse(Id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Book not found with Id" + Id));
+
+        }
+
+
+
+
+
+        private void validateCategories (Set < Long > categoryIds) {
+            List<Category> categories = categoryRepository.findAllById(categoryIds);
+            if (categories.size() != categoryIds.size()) {
+                Set<Long> foundIds = categories.stream().map(Category::getId).collect(Collectors.toSet());
+                Set<Long> notFoundIds = categoryIds.stream()
+                        .filter(id -> !foundIds.contains(id))
+                        .collect(Collectors.toSet());
+                throw new ResourceNotFoundException("Categories not found with IDs: " + notFoundIds);
             }
         }
-
-        Book updatedBook = bookRepository.save(existingBook);
-        log.info("Updated book with ID: {}", updatedBook.getId());
-
-        return bookMapper.toResponse(updatedBook);
     }
-
-    private Book findBookByIdOrThrow(Long id) {
-        return bookRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Book not found with ID: " + id));
-    }
-
-    private void validateCategories(Set<Long> categoryIds) {
-        List<Category> categories = categoryRepository.findAllById(categoryIds);
-        if (categories.size() != categoryIds.size()) {
-            Set<Long> foundIds = categories.stream().map(Category::getId).collect(Collectors.toSet());
-            Set<Long> notFoundIds = categoryIds.stream()
-                    .filter(id -> !foundIds.contains(id))
-                    .collect(Collectors.toSet());
-            throw new ResourceNotFoundException("Categories not found with IDs: " + notFoundIds);
-        }
-    }
-}

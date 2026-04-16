@@ -32,4 +32,6 @@ public interface BookService {
 
     BookResponse updateBook(Long id, BookUpdateRequest request);
 
+    Page<BookResponse> getBookByStatus (BookStatus status, Pageable pageable);
+
 }
