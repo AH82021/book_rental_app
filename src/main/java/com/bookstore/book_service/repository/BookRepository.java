@@ -22,7 +22,7 @@ public interface BookRepository extends JpaRepository<Book,Long> {
   // page 1  10 books
   // page 2  10 books
      Optional<Book> findByIdAndDeletedFalse(Long id);
-
+    Page<Book> findByStatusAndDeletedFalse(BookStatus status, Pageable pageable);
 
     @Query("SELECT DISTINCT b FROM Book b WHERE b.deleted = false AND " +
             "(:keyword IS NULL OR " +

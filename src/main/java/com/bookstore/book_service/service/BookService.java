@@ -29,4 +29,6 @@ public interface BookService {
 
     void deleteBookById(Long Id);
 
+    Page<BookResponse> getBookByStatus (BookStatus status, Pageable pageable);
+
 }

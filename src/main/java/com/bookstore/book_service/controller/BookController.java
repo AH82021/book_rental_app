@@ -46,6 +46,17 @@ public class BookController {
         return  ResponseEntity.ok().body(books);
     }
 
+    @GetMapping ("/status/{status}")
+    @Operation(summary = "Get book by status", description = "Retrieves books with specific status.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Book retrieved Successfully"),
+
+    })
+
+    public ResponseEntity<Page<BookResponse>> getBooksByStatus  ( @Parameter(description = "Book Status") @PathVariable BookStatus status, @PageableDefault(size = 20, sort= "title") Pageable pageable) {
+      Page<BookResponse> books = bookService.getBookByStatus(status, pageable);
+      return  ResponseEntity.ok(books);
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get book by ID", description = "Returns a single book by its ID. The book must not be marked as deleted.")

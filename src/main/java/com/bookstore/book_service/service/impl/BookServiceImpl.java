@@ -98,6 +98,16 @@ private final BookMapper  bookMapper;
         bookRepository.save(book);
         log.info("Deleted Book with Id:{}",Id);
     }
+
+    @Override
+    public Page<BookResponse> getBookByStatus(BookStatus status, Pageable pageable) {
+
+        log.debug("Fetching book by status: {}", status);
+        Page<Book> books = bookRepository.findByStatusAndDeletedFalse(status, pageable);
+        log.info("Fetching books with pagination:{} ", books);
+        return books.map(bookMapper::toResponse);
+    }
+
     // helper method
     private Book findBookByIdOrThrow(Long Id){
         return bookRepository.findByIdAndDeletedFalse(Id)
