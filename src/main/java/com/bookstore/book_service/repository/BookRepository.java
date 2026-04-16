@@ -11,16 +11,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
-@Repository // this class will be detected automatically by spring and will be used as a bean,
+@Repository
 public interface BookRepository extends JpaRepository<Book,Long> {
 
 
     Page<Book> findByDeletedFalse(Pageable pageable);
-  // page 0 10 books
-  // page 1  10 books
-  // page 2  10 books
+
      Optional<Book> findByIdAndDeletedFalse(Long id);
     Page<Book> findByStatusAndDeletedFalse(BookStatus status, Pageable pageable);
 
@@ -31,7 +30,6 @@ public interface BookRepository extends JpaRepository<Book,Long> {
             " LOWER(b.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Book>  searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
-      /// to do an advance search
 
     @Query("""
        SELECT DISTINCT b FROM Book b LEFT JOIN b.categories c WHERE b.deleted = false AND
@@ -59,6 +57,43 @@ public interface BookRepository extends JpaRepository<Book,Long> {
                            @Param("language") String language,
                            @Param("available") Boolean available,
                            Pageable pageable);
+    // Inventory related
+    @Query("SELECT b FROM Book b WHERE b.deleted = false AND b.availableCopies <= :threshold")
+    Page<Book> findLowStockBooks(@Param("threshold") int threshold, Pageable pageable);
 
+    @Query("SELECT b FROM Book b WHERE b.deleted = false AND b.availableCopies > 0 AND b.status = 'AVAILABLE'")
+    Page<Book> findAvailableBooks(Pageable pageable);
+
+    // Books with categories (for eager loading)
+    @Query("SELECT DISTINCT b FROM Book b LEFT JOIN FETCH b.categories WHERE b.deleted = false")
+    Page<Book> findAllWithCategories(Pageable pageable);
+
+    @Query("SELECT DISTINCT b FROM Book b LEFT JOIN FETCH b.categories WHERE b.id = :id AND b.deleted = false")
+    Optional<Book> findByIdWithCategories(@Param("id") Long id);
+
+    // Specific field searches
+    Page<Book> findByAuthorContainingIgnoreCaseAndDeletedFalse(String author, Pageable pageable);
+
+    Page<Book> findByTitleContainingIgnoreCaseAndDeletedFalse(String title, Pageable pageable);
+
+    Page<Book> findByPublisherContainingIgnoreCaseAndDeletedFalse(String publisher, Pageable pageable);
+
+    Page<Book> findByLanguageAndDeletedFalse(String language, Pageable pageable);
+
+    // Count operations
+    long countByStatusAndDeletedFalse(BookStatus status);
+
+    @Query("SELECT COUNT(b) FROM Book b WHERE b.deleted = false")
+    long countActiveBooks();
+
+    @Query("SELECT COUNT(b) FROM Book b JOIN b.categories c WHERE c.id = :categoryId AND b.deleted = false")
+    long countBooksByCategory(@Param("categoryId") Long categoryId);
+
+    // Featured/Popular books
+    @Query("SELECT b FROM Book b WHERE b.deleted = false AND b.status = 'AVAILABLE' ORDER BY b.availableCopies ASC")
+    List<Book> findPopularBooks(Pageable pageable);
+
+    @Query("SELECT b FROM Book b WHERE b.deleted = false ORDER BY b.createdAt DESC")
+    List<Book> findLatestBooks(Pageable pageable);
 
 }
