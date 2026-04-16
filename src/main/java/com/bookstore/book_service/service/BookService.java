@@ -28,6 +28,8 @@ public interface BookService {
                                    BigDecimal maxPrice, String publisher, String language,
                                    Boolean available, Pageable pageable);
 
+    void deleteBookById(Long Id);
+
     BookResponse updateBook(Long id, BookUpdateRequest request);
 
 }

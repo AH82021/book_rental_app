@@ -99,6 +99,17 @@ private final BookMapper  bookMapper;
         return books.map(bookMapper::toResponse);
     }
 
+    @Override
+    public void deleteBookById(Long Id) {
+        log.debug("Deleting Book by ID:{}", Id);
+        Book book = findBookByIdOrThrow(Id);
+        book.softDelete();
+        bookRepository.save(book);
+        log.info("Deleted Book with Id:{}",Id);
+    }
+
+
+
 // Update book impl
     @Override
     public BookResponse updateBook(Long id, BookUpdateRequest request) {
