@@ -3,6 +3,7 @@ package com.bookstore.book_service.service;
 
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
+import com.bookstore.book_service.dto.BookUpdateRequest;
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
 import com.bookstore.book_service.repository.BookRepository;
@@ -26,5 +27,7 @@ public interface BookService {
                                    Long categoryId, BookStatus status, BigDecimal minPrice,
                                    BigDecimal maxPrice, String publisher, String language,
                                    Boolean available, Pageable pageable);
+
+    BookResponse updateBook(Long id, BookUpdateRequest request);
 
 }

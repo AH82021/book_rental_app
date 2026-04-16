@@ -3,12 +3,15 @@ package com.bookstore.book_service.controller;
 
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
+import com.bookstore.book_service.dto.BookUpdateRequest;
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
 import com.bookstore.book_service.service.BookService;
 import com.bookstore.book_service.service.impl.BookServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +98,21 @@ public class BookController {
                 minPrice, maxPrice, publisher, language, available, pageable
         );
         return ResponseEntity.ok().body(books);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update book", description = "Updates an existing book with the provided information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data"),
+            @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+    public ResponseEntity<BookResponse> updateBook(
+            @Parameter(description = "Book ID") @PathVariable Long id,
+            @Valid @RequestBody BookUpdateRequest request) {
+        log.info("Updating book with ID: {}", id);
+        BookResponse response = bookService.updateBook(id, request);
+        return ResponseEntity.ok(response);
     }
 }
 
