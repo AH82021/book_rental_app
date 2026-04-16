@@ -2,11 +2,15 @@ package com.bookstore.book_service.service.impl;
 
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
+import com.bookstore.book_service.dto.BookUpdateRequest;
+import com.bookstore.book_service.exception.InvalidRequestException;
 import com.bookstore.book_service.exception.ResourceNotFoundException;
 import com.bookstore.book_service.mapper.BookMapper;
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
+import com.bookstore.book_service.model.Category;
 import com.bookstore.book_service.repository.BookRepository;
+import com.bookstore.book_service.repository.CategoryRepository;
 import com.bookstore.book_service.service.BookService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +24,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class BookServiceImpl implements BookService {
 
 private final BookRepository bookRepository;
+
+private final CategoryRepository categoryRepository;
 
 private final BookMapper  bookMapper;
 
@@ -99,20 +108,65 @@ private final BookMapper  bookMapper;
         log.info("Deleted Book with Id:{}",Id);
     }
 
+
+
+// Update book impl
     @Override
-    public Page<BookResponse> getBookByStatus(BookStatus status, Pageable pageable) {
+    public BookResponse updateBook(Long id, BookUpdateRequest request) {
+        log.debug("Updating book with ID: {}", id);
 
-        log.debug("Fetching book by status: {}", status);
-        Page<Book> books = bookRepository.findByStatusAndDeletedFalse(status, pageable);
-        log.info("Fetching books with pagination:{} ", books);
-        return books.map(bookMapper::toResponse);
+        Book existingBook = findBookByIdOrThrow(id);
+
+        // Validate categories if provided
+        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
+            validateCategories(request.getCategoryIds());
+        }
+
+        // Validate inventory constraints
+        if (request.getTotalCopies() != null && request.getAvailableCopies() != null) {
+            if (request.getAvailableCopies() > request.getTotalCopies()) {
+                throw new InvalidRequestException("Available copies cannot exceed total copies");
+            }
+        } else if (request.getTotalCopies() != null && request.getTotalCopies() < existingBook.getAvailableCopies()) {
+            throw new InvalidRequestException("Total copies cannot be less than current available copies");
+        } else if (request.getAvailableCopies() != null && request.getAvailableCopies() > existingBook.getTotalCopies()) {
+            throw new InvalidRequestException("Available copies cannot exceed total copies");
+        }
+
+        // Update basic fields
+        bookMapper.updateEntity(existingBook, request);
+
+        return bookMapper.toResponse(existingBook);
+
     }
+        @Override
+        public Page<BookResponse> getBookByStatus (BookStatus status, Pageable pageable){
 
-    // helper method
-    private Book findBookByIdOrThrow(Long Id){
-        return bookRepository.findByIdAndDeletedFalse(Id)
-                .orElseThrow(()-> new ResourceNotFoundException("Book not found with Id"+ Id));
+            log.debug("Fetching book by status: {}", status);
+            Page<Book> books = bookRepository.findByStatusAndDeletedFalse(status, pageable);
+            log.info("Fetching books with pagination:{} ", books);
+            return books.map(bookMapper::toResponse);
+        }
 
+        // helper method
+        private Book findBookByIdOrThrow (Long Id) {
+            return bookRepository.findByIdAndDeletedFalse(Id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Book not found with Id" + Id));
+
+        }
+
+
+
+
+
+        private void validateCategories (Set < Long > categoryIds) {
+            List<Category> categories = categoryRepository.findAllById(categoryIds);
+            if (categories.size() != categoryIds.size()) {
+                Set<Long> foundIds = categories.stream().map(Category::getId).collect(Collectors.toSet());
+                Set<Long> notFoundIds = categoryIds.stream()
+                        .filter(id -> !foundIds.contains(id))
+                        .collect(Collectors.toSet());
+                throw new ResourceNotFoundException("Categories not found with IDs: " + notFoundIds);
+            }
+        }
     }
-
-}
