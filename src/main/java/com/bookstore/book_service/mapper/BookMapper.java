@@ -2,6 +2,7 @@ package com.bookstore.book_service.mapper;
 
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
+import com.bookstore.book_service.dto.BookUpdateRequest;
 import com.bookstore.book_service.dto.CategoryResponse;
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.Category;
@@ -57,7 +58,7 @@ public interface BookMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deleted", ignore = true)
-    void updateEntity(@MappingTarget Book book, BookCreateRequest request);
+    void updateEntity(@MappingTarget Book book, BookUpdateRequest request);
 
     /**
      * Converts Book entity to BookResponse DTO
