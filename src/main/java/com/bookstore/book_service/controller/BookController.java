@@ -140,6 +140,21 @@ public class BookController {
         BookResponse response = bookService.updateBook(id, request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/latest")
+
+            @Operation(summary = " get latest books ", description = "Retrieves the latest added books")
+            @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",description = "Latest books retrieved successfully"),
+
+    })
+    public ResponseEntity<List<BookResponse>> getLatestBooks(@RequestParam(defaultValue = "10") int limit){
+
+       List<BookResponse> books = bookService.getLatestBooks(limit);
+       return ResponseEntity.ok().body(books);
+
+
+    }
 }
 
 
