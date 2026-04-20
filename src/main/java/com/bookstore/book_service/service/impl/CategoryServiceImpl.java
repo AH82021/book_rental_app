@@ -3,6 +3,10 @@ package com.bookstore.book_service.service.impl;
 import com.bookstore.book_service.dto.CategoryCreateRequest;
 import com.bookstore.book_service.dto.CategoryResponse;
 import com.bookstore.book_service.dto.CategoryUpdateRequest;
+import com.bookstore.book_service.exception.ResourceNotFoundException;
+import com.bookstore.book_service.mapper.CategoryMapper;
+import com.bookstore.book_service.model.Book;
+import com.bookstore.book_service.model.Category;
 import com.bookstore.book_service.repository.CategoryRepository;
 import com.bookstore.book_service.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -10,15 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public CategoryResponse createCategory(CategoryCreateRequest request) {
@@ -26,8 +33,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly=true)
     public CategoryResponse getCategoryById(Long id) {
-        return null;
+       Category category = findCategoryByIdOrThrow(id);
+       return categoryMapper.toResponse(category);
     }
 
     @Override
@@ -119,4 +128,13 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean isValidHierarchy(Long categoryId, Long newParentId) {
         return false;
     }
+
+
+    private Category findCategoryByIdOrThrow (Long Id) {
+        return categoryRepository.findById(Id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with Id" + Id));
+
+    }
 }
+
+

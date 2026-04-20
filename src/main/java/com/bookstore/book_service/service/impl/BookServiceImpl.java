@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,9 +105,30 @@ private final BookMapper  bookMapper;
     }
 
     @Override
+    @Transactional
     public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
-        return null;
+
+        Book book = findBookByIdOrThrow(bookId);
+
+        Set<Category> categories = categoryRepository.findAllById(categoryIds)
+                .stream()
+                .collect(Collectors.toSet());
+
+        if (categories.size() != categoryIds.size()) {
+            throw new ResourceNotFoundException("One or more categories not found");
+        }
+
+        for (Category category : categories) {
+            book.addCategory(category);
+        }
+
+        Book updatedBook = bookRepository.save(book);
+        log.info("Added {} categories to book ID: {}" ,categoryIds.size(),bookId);
+
+        return bookMapper.toResponse(updatedBook);
     }
+
+
 
     @Override
     public BookResponse removeCategoriesFromBook(Long bookId, Set<Long> categoryIds) {
