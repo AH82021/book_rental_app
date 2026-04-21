@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,7 +121,15 @@ private final BookMapper  bookMapper;
 
     @Override
     public List<BookResponse> getLatestBooks(int limit) {
-        return List.of();
+        log.debug("Fetching latest books with limit:{} ",limit);
+            Pageable pageable = PageRequest.of(0, limit);
+
+     List<Book> books =bookRepository.findLatestBooks(pageable);
+     return books.stream()
+             .map(bookMapper::toResponse)
+             .toList();
+
+
     }
 
     @Override
