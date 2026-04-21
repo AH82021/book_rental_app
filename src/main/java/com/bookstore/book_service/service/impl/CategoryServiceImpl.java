@@ -3,6 +3,8 @@ package com.bookstore.book_service.service.impl;
 import com.bookstore.book_service.dto.CategoryCreateRequest;
 import com.bookstore.book_service.dto.CategoryResponse;
 import com.bookstore.book_service.dto.CategoryUpdateRequest;
+import com.bookstore.book_service.mapper.CategoryMapper;
+import com.bookstore.book_service.model.Category;
 import com.bookstore.book_service.repository.CategoryRepository;
 import com.bookstore.book_service.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +22,8 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+
 
     @Override
     public CategoryResponse createCategory(CategoryCreateRequest request) {
@@ -44,15 +49,20 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
 
     }
-
     @Override
+    @Transactional(readOnly = true)
     public Page<CategoryResponse> getAllCategories(Pageable pageable) {
-        return null;
+        log.info("Fetching all categories with pagination: {}", pageable);
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return categories.map(categoryMapper::toResponse);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CategoryResponse> getRootCategories(Pageable pageable) {
-        return null;
+        log.info("Fetching root categories with pagination: {}", pageable);
+        Page<Category> categories = categoryRepository.findByParentIsNull(pageable);
+        return categories.map(categoryMapper::toResponse);
     }
 
     @Override
