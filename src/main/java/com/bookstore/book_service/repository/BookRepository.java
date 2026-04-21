@@ -96,4 +96,5 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     @Query("SELECT b FROM Book b WHERE b.deleted = false ORDER BY b.createdAt DESC")
     List<Book> findLatestBooks(Pageable pageable);
 
+    boolean existsByIsbnAndDeletedFalse(String isbn);
 }

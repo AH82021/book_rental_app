@@ -145,9 +145,12 @@ private final BookMapper  bookMapper;
         return List.of();
     }
 
+
     @Override
+    @Transactional(readOnly = true)
     public boolean existsByIsbn(String isbn) {
-        return false;
+
+        return bookRepository.existsByIsbnAndDeletedFalse(isbn);
     }
 
     @Override
