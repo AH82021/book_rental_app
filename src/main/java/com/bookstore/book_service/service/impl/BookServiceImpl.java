@@ -105,28 +105,7 @@ private final BookMapper  bookMapper;
         return null;
     }
 
-
-    @Transactional
-    @Override
-    public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
-
-        Set<Category> categories = new HashSet<>(
-                categoryRepository.findAllById(categoryIds)
-        );
-
-
-        book.getCategories().addAll(categories);
-
-        Book updatedBook = bookRepository.save(book);
-
-        return  bookMapper.toResponse(updatedBook);
-
-
-
-}
+add
     @Override
     public BookResponse removeCategoriesFromBook(Long bookId, Set<Long> categoryIds) {
         return null;
