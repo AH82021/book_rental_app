@@ -1,6 +1,8 @@
 package com.bookstore.book_service.controller;
 
+import com.bookstore.book_service.dto.BookResponse;
 import com.bookstore.book_service.dto.CategoryResponse;
+import com.bookstore.book_service.service.BookService;
 import com.bookstore.book_service.service.CategoryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")

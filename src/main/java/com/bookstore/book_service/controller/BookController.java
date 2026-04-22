@@ -178,6 +178,12 @@ public class BookController {
                 bookService.addCategoriesToBook(id, categoryIds)
         );
     }
+    @GetMapping("/featured")
+    public ResponseEntity<List<BookResponse>> getFeaturedBook(int limit){
+
+        List<BookResponse> response = bookService.getFeaturedBooks(limit);
+        return ResponseEntity.ok(response);
+    }
 }
 
 

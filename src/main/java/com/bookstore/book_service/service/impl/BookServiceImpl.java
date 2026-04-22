@@ -134,10 +134,14 @@ private final BookMapper  bookMapper;
 
     @Override
     public List<BookResponse> getFeaturedBooks(int limit) {
-        return List.of();
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<Book> books = bookRepository.findPopularBooks(pageable);
+    return books.stream().map(bookMapper::toResponse).toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookResponse> getLatestBooks(int limit) {
         log.debug("Fetching latest books with limit:{} ",limit);
             Pageable pageable = PageRequest.of(0, limit);
