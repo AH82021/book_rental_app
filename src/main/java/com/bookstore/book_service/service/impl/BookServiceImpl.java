@@ -106,7 +106,25 @@ private final BookMapper  bookMapper;
 
     @Override
     public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
-        return null;
+        Book book = findBookByIdOrThrow(bookId);
+
+        validateCategories(categoryIds);
+
+        Set<Category> categories = categoryRepository.findAllById(categoryIds)
+                .stream()
+                .collect(Collectors.toSet());
+
+
+
+
+        book.getCategories().addAll(categories);
+
+        Book updatedBook = bookRepository.save(book);
+
+        log.info("Added {} categories to book ID : {}",categoryIds.size(), bookId);
+
+        return bookMapper.toResponse(updatedBook);
+
     }
 
     @Override
