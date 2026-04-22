@@ -6,11 +6,14 @@ import com.bookstore.book_service.dto.BookResponse;
 import com.bookstore.book_service.dto.BookUpdateRequest;
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
+import com.bookstore.book_service.model.Category;
 import com.bookstore.book_service.repository.BookRepository;
+import jakarta.persistence.Id;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 

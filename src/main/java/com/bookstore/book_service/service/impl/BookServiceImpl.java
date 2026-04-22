@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -104,11 +105,28 @@ private final BookMapper  bookMapper;
         return null;
     }
 
+
+    @Transactional
     @Override
     public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
-        return null;
-    }
 
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+
+        Set<Category> categories = new HashSet<>(
+                categoryRepository.findAllById(categoryIds)
+        );
+
+
+        book.getCategories().addAll(categories);
+
+        Book updatedBook = bookRepository.save(book);
+
+        return  bookMapper.toResponse(updatedBook);
+
+
+
+}
     @Override
     public BookResponse removeCategoriesFromBook(Long bookId, Set<Long> categoryIds) {
         return null;

@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-
+import java.util.Set;
 
 
 @RestController
@@ -156,5 +156,30 @@ public class BookController {
 
     }
 }
+
+    @PostMapping("/{bookId}/categories")
+    @Operation(
+            summary = "Add categories to a book",
+            description = "Attaches one or more categories to an existing book by its ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Categories added successfully"),
+            @ApiResponse(responseCode = "404", description = "Book not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid category IDs provided")
+    })
+    public ResponseEntity<BookResponse> addCategoriesToBook(
+            @Parameter(description = "ID of the book", example = "1")
+            @PathVariable Long bookId,
+            @Parameter(description = "List of category IDs to attach to the book", example = "[1,2,3]")
+            @RequestBody Set<Long> categoryIds) {
+
+        log.info("Adding categories {} to book {}", categoryIds, bookId);
+
+        return ResponseEntity.ok(
+                bookService.addCategoriesToBook(bookId, categoryIds)
+        );
+    }
+    }
+
 
 
