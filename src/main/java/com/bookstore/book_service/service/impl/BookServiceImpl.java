@@ -80,6 +80,24 @@ private final BookMapper  bookMapper;
         return null;
     }
 
+    @Transactional
+    @Override
+    public BookResponse addCategoriesToBook(Long bookId, Set<Long> categoryIds) {
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new ResourceNotFoundException("Book not found with id: " + bookId));
+
+        Set<Category> categories = new HashSet<>(categoryRepository.findAllById(categoryIds));
+
+        if (categories.size() != categoryIds.size()) {
+            throw new ResourceNotFoundException("One or more category IDs not found");
+        }
+
+        book.getCategories().addAll(categories);
+
+        return bookMapper.toResponse(book);
+    }
+
     @Override
     public Page<BookResponse> getAvailableBooks(Pageable pageable) {
         return null;
@@ -105,7 +123,6 @@ private final BookMapper  bookMapper;
         return null;
     }
 
-add
     @Override
     public BookResponse removeCategoriesFromBook(Long bookId, Set<Long> categoryIds) {
         return null;
