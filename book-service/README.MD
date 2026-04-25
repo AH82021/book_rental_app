@@ -141,6 +141,7 @@ A comprehensive microservice for managing books and categories in the Book Renta
 - **Jakarta Validation**: Input validation
 - **Swagger/OpenAPI**: API documentation
 - **Docker**: Containerization support
+- **Caching**: Redis , Spring Cache abstraction
 
 ## Implementation Status
 

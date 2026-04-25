@@ -1,5 +1,6 @@
 package com.bookstore.book_service.service.impl;
 
+import com.bookstore.book_service.config.CacheConfig;
 import com.bookstore.book_service.dto.BookCreateRequest;
 import com.bookstore.book_service.dto.BookResponse;
 import com.bookstore.book_service.dto.BookUpdateRequest;
@@ -16,6 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +43,7 @@ private final CategoryRepository categoryRepository;
 
 private final BookMapper  bookMapper;
 
-
+// Cacheable
     @Override
     public Page<BookResponse> findAllBooks(Pageable pageable) {
 
@@ -60,6 +64,8 @@ private final BookMapper  bookMapper;
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.CACHE_BOOKS, key = "#id")
     public BookResponse getBookById(Long id) {
         // convert book to bookResponse
 
@@ -70,8 +76,11 @@ private final BookMapper  bookMapper;
     }
 
     @Override
+    @Cacheable(value = CacheConfig.CACHE_BOOKS_BY_ISBN,key = "#isbn")
     public BookResponse getBookByIsbn(String isbn) {
-        return null;
+
+        Book book =bookRepository.findByIsbnAndDeletedFalse(isbn).orElseThrow(()-> new ResourceNotFoundException("Book with ISBN " + isbn + " not found"));
+        return bookMapper.toResponse(book);
     }
 
     @Override
@@ -199,6 +208,7 @@ private final BookMapper  bookMapper;
     }
 
     @Override
+@CacheEvict(value = CacheConfig.CACHE_BOOKS,allEntries = true)
     public void deleteBookById(Long Id) {
         log.debug("Deleting Book by ID:{}", Id);
         Book book = findBookByIdOrThrow(Id);
@@ -211,6 +221,7 @@ private final BookMapper  bookMapper;
 
 // Update book impl
     @Override
+    @CachePut(value = CacheConfig.CACHE_BOOKS, key = "#id")
     public BookResponse updateBook(Long id, BookUpdateRequest request) {
         log.debug("Updating book with ID: {}", id);
 

@@ -20,6 +20,7 @@ public interface BookRepository extends JpaRepository<Book,Long> {
 
     Page<Book> findByDeletedFalse(Pageable pageable);
 
+    Optional<Book> findByIsbnAndDeletedFalse(String isbn);
      Optional<Book> findByIdAndDeletedFalse(Long id);
     Page<Book> findByStatusAndDeletedFalse(BookStatus status, Pageable pageable);
 
@@ -95,5 +96,7 @@ public interface BookRepository extends JpaRepository<Book,Long> {
 
     @Query("SELECT b FROM Book b WHERE b.deleted = false ORDER BY b.createdAt DESC")
     List<Book> findLatestBooks(Pageable pageable);
+
+
 
 }
