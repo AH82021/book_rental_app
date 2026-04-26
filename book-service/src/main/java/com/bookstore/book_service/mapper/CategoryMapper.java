@@ -4,9 +4,11 @@ import com.bookstore.book_service.dto.CategoryCreateRequest;
 import com.bookstore.book_service.dto.CategoryResponse;
 import com.bookstore.book_service.dto.CategoryUpdateRequest;
 import com.bookstore.book_service.model.Category;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 import java.util.Set;
@@ -67,17 +69,29 @@ public interface CategoryMapper {
     @Mapping(target = "createdAt", ignore = true)
     void updateEntity(@MappingTarget Category category, CategoryUpdateRequest request, Category parent);
 
-    /**
-     * Converts Category entity to CategoryResponse DTO
-     */
-    @Mapping(target = "parentId", expression = "java(category.getParent() != null ? category.getParent().getId() : null)")
-    @Mapping(target = "parentName", expression = "java(category.getParent() != null ? category.getParent().getName() : null)")
-    @Mapping(target = "bookCount", expression = "java(category.getBooks() != null ? category.getBooks().size() : 0)")
-    @Mapping(target = "updatedAt", ignore = true)
-    CategoryResponse toResponse(Category category);
+     /**
+      * Converts Category entity to CategoryResponse DTO
+      */
+     @Named("toResponse")
+     @Mapping(target = "parentId", expression = "java(category.getParent() != null ? category.getParent().getId() : null)")
+     @Mapping(target = "parentName", expression = "java(category.getParent() != null ? category.getParent().getName() : null)")
+     @Mapping(target = "bookCount", expression = "java(category.getBooks() != null ? category.getBooks().size() : 0)")
+     @Mapping(target = "updatedAt", ignore = true)
+     CategoryResponse toResponse(Category category);
 
-    /**
-     * Converts a set of Category entities to a set of CategoryResponse DTOs
-     */
-    Set<CategoryResponse> toResponseSet(Set<Category> categories);
+      /**
+      * Converts a set of Category entities to a set of CategoryResponse DTOs
+      */
+      @IterableMapping(qualifiedByName = "toResponse")
+      Set<CategoryResponse> toResponseSet(Set<Category> categories);
+
+       /**
+        * Converts Category entity to CategoryResponse DTO including children
+        */
+       @Named("toResponseWithChildren")
+       @Mapping(target = "parentId", expression = "java(category.getParent() != null ? category.getParent().getId() : null)")
+       @Mapping(target = "parentName", expression = "java(category.getParent() != null ? category.getParent().getName() : null)")
+       @Mapping(target = "bookCount", expression = "java(category.getBooks() != null ? category.getBooks().size() : 0)")
+       @Mapping(target = "updatedAt", ignore = true)
+       CategoryResponse toResponseWithChildren(Category category);
 }

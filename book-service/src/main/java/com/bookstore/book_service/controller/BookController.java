@@ -104,7 +104,7 @@ public class BookController {
             @RequestParam(required = false) Boolean available,
             @PageableDefault(size = 20, sort = "title") Pageable pageable) {
         log.debug("Received advanced search request with title:{}, author:{}, status:{}", title, author, status);
-        Page<BookResponse> books = bookService.advancedSearch(
+        Page<BookResponse> books = bookService.searchBooksAdvanced(
                 title, author, isbn, categoryId, status,
                 minPrice, maxPrice, publisher, language, available, pageable
         );

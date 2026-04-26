@@ -48,7 +48,7 @@ public interface BookService {
      * @return page of book responses
      */
 
-    Page<BookResponse> advancedSearch(String title, String author, String isbn,
+    Page<BookResponse> searchBooksAdvanced(String title, String author, String isbn,
                                    Long categoryId, BookStatus status, BigDecimal minPrice,
                                    BigDecimal maxPrice, String publisher, String language,
                                    Boolean available, Pageable pageable);

@@ -104,4 +104,6 @@ public interface BookMapper {
      * Converts a set of Category entities to a set of CategoryResponse DTOs
      */
     Set<CategoryResponse> toCategoryResponseSet(Set<Category> categories);
+
+
 }

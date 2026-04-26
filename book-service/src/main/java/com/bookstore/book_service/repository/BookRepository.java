@@ -2,6 +2,7 @@ package com.bookstore.book_service.repository;
 
 import com.bookstore.book_service.model.Book;
 import com.bookstore.book_service.model.BookStatus;
+import jakarta.validation.constraints.Pattern;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -90,6 +91,8 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     @Query("SELECT COUNT(b) FROM Book b JOIN b.categories c WHERE c.id = :categoryId AND b.deleted = false")
     long countBooksByCategory(@Param("categoryId") Long categoryId);
 
+    @Query("SELECT DISTINCT b FROM Book b JOIN b.categories c WHERE c.id = :categoryId AND b.deleted = false")
+    Page<Book> findByCategoryId(@Param("categoryId") Long categoryId, Pageable pageable);
     // Featured/Popular books
     @Query("SELECT b FROM Book b WHERE b.deleted = false AND b.status = 'AVAILABLE' ORDER BY b.availableCopies ASC")
     List<Book> findPopularBooks(Pageable pageable);
@@ -98,5 +101,5 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     List<Book> findLatestBooks(Pageable pageable);
 
 
-
+    boolean existsByIsbnAndDeletedFalse(String isbn);;
 }
