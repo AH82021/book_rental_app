@@ -31,7 +31,7 @@
 <!--        <module>rental-service</module>-->
 <!--        <module>notification-service</module>-->
 <!--        <module>report-service</module>-->
-<!--        <module>auth-service</module>-->
+        <module>auth-service</module>
 <!--        <module>shared-libs</module>-->
     </modules>
 
