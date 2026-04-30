@@ -1,0 +1,73 @@
+services:
+  # ─── Auth Service ─────────────────────────────────────────
+  auth-service:
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_ORG:-bookstore}/auth-service:${IMAGE_TAG:-latest}
+    container_name: prod-auth-service
+    restart: always
+    build: {}
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/authdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ─── User Service ─────────────────────────────────────────
+  user-service:
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_ORG:-bookstore}/user-service:${IMAGE_TAG:-latest}
+    container_name: prod-user-service
+    restart: always
+    build: {}
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/userdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ─── Book Service ─────────────────────────────────────────
+  book-service:
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_ORG:-bookstore}/book-service:${IMAGE_TAG:-latest}
+    container_name: prod-book-service
+    restart: always
+    build: {}
+    environment:
+      - SPRING_PROFILES_ACTIVE=production
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_REDIS_HOST=redis
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"

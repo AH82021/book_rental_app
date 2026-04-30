@@ -1,0 +1,107 @@
+services:
+  # ─── Infrastructure ───────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-dbs.sql:/docker-entrypoint-initdb.d/init-dbs.sql
+    networks:
+      - book-nest-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - book-nest-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - book-nest-network
+
+  # ─── Services (Base Configuration) ────────────────────────
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    ports:
+      - "8088:8088"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/authdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - book-nest-network
+
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/userdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - book-nest-network
+
+  book-service:
+    build:
+      context: .
+      dockerfile: book-service/Dockerfile
+    container_name: book-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_REDIS_HOST=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - book-nest-network
+
+  # Add future services here (e.g. report-service using mongodb)
+
+volumes:
+  postgres_data:
+  mongodb_data:
+
+networks:
+  book-nest-network:
+    driver: bridge

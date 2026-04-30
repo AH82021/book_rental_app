@@ -1,0 +1,86 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+env:
+  JAVA_VERSION: "17"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+jobs:
+  validate:
+    name: Build & Test Validation
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_USER: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:6.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: "temurin"
+          cache: maven
+
+      - name: Verify Maven Wrapper
+        run: |
+          chmod +x mvnw
+          ./mvnw --version
+
+      - name: Compile
+        run: ./mvnw clean compile ${{ env.MAVEN_CLI_OPTS }}
+
+      - name: Run Unit Tests
+        run: ./mvnw test ${{ env.MAVEN_CLI_OPTS }} -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Run Integration Tests
+        run: |
+          ./mvnw verify -P integration-tests ${{ env.MAVEN_CLI_OPTS }} \
+            -Dspring.datasource.url=jdbc:postgresql://localhost:5432/testdb \
+            -Dspring.datasource.username=postgres \
+            -Dspring.datasource.password=password \
+            -Dspring.redis.host=localhost \
+            -Dspring.redis.port=6379 \
+            -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            */target/surefire-reports/*.xml
+            */target/failsafe-reports/*.xml
+          retention-days: 5
