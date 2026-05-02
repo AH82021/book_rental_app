@@ -518,6 +518,27 @@ Full infrastructure setup coming soon:
 
 ---
 
+## **⚙️ CI/CD Pipelines**
+
+This project utilizes a dual-pipeline approach to handle Continuous Integration (CI) and Continuous Deployment (CD).
+
+### **1. GitHub Actions (Continuous Integration)**
+
+GitHub Actions is configured to handle code validation, testing, and container registry pushing.
+- **Pull Request Validation (`pr-validation.yml`)**: Triggers automatically when a PR is opened against `main` or `develop`. It spins up ephemeral infrastructure (PostgreSQL, Redis, MongoDB), compiles the code, and runs all unit and integration tests to ensure code quality before merging.
+- **CI/CD Pipeline (`ci-cd.yml`)**: Triggers on pushes to `main` and `develop`. It performs full builds, tests all services, builds Docker images in parallel, and pushes the resulting artifacts to the GitHub Container Registry (GHCR).
+
+### **2. Jenkins (Continuous Deployment)**
+
+Jenkins is configured to handle the deployment and release lifecycle across environments.
+- **Jenkinsfile**: A declarative pipeline that handles everything from code quality scanning (SonarQube) and security scanning (OWASP Dependency-Check, Trivy) to dynamic parallel Docker builds.
+- **Automated Rollbacks**: Our custom deployment scripts (`jenkins/scripts/deploy.sh` and `rollback.sh`) automatically monitor service health after deployment. If a service fails its health check, the pipeline automatically rolls it back to the previous healthy image tag.
+- **Future-Proof**: The deployment scripts dynamically read from the `docker-compose` files. When you add a new service to `docker-compose.yml`, the pipeline will automatically detect it, build it, and deploy it without any script modifications required.
+
+For a full guide on setting up Jenkins for this repository, see [`jenkins/README.md`](jenkins/README.md).
+
+---
+
 ## **🛑 Stopping Services**
 
 ### **Stop Individual Services**

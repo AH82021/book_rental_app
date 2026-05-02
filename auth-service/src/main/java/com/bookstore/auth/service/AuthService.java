@@ -1,6 +1,7 @@
 package com.bookstore.auth.service;
 
 import com.bookstore.auth.dto.AuthResponse;
+import com.bookstore.auth.dto.LoginRequest;
 import com.bookstore.auth.dto.RegisterRequest;
 import com.bookstore.auth.dto.UserResponse;
 import com.bookstore.auth.model.User;
@@ -41,4 +42,32 @@ public class AuthService {
 
     }
 
+
+
+    public AuthResponse login(LoginRequest request){
+
+        // Find user by email
+      User user =   userRepository.findByEmail(request.getEmail())
+                .orElseThrow(()-> new RuntimeException("Invalid email or password"));
+
+        //very password
+
+        if(!passwordEncoder.matches(request.getPassword(),user.getPassword())){
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        //Generate token
+        String token = jwtUtil.generateToken(
+                user.getEmail(),
+                user.getId(),
+                user.getRole().name()
+        );
+
+        return  new AuthResponse(token,UserResponse.fromUser(user));
+    }
+
+
+
 }
+
+
