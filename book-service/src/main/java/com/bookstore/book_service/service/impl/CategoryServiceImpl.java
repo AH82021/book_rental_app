@@ -9,6 +9,7 @@ import com.bookstore.book_service.exception.InvalidRequestException;
 import com.bookstore.book_service.exception.ResourceNotFoundException;
 import com.bookstore.book_service.mapper.CategoryMapper;
 import com.bookstore.book_service.model.Category;
+import com.bookstore.book_service.repository.BookRepository;
 import com.bookstore.book_service.repository.CategoryRepository;
 import com.bookstore.book_service.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final BookRepository bookRepository;
     private final CategoryMapper categoryMapper;
 
     @Override
@@ -155,12 +157,12 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = findCategoryByIdOrThrow(id);
 
         // Check if category has books
-        if (!category.getBooks().isEmpty()) {
+        if (bookRepository.existsByCategoriesIdAndDeletedFalse(id)) {
             throw new InvalidRequestException("Cannot delete category with books. Please move books to another category first.");
         }
 
         // Check if category has children
-        if (!category.getChildren().isEmpty()) {
+        if (categoryRepository.existsByParentId(id)) {
             throw new InvalidRequestException("Cannot delete category with subcategories. Please delete or move subcategories first.");
         }
 

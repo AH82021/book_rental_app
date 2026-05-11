@@ -21,4 +21,5 @@ public class CategoryResponse {
     private Integer bookCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private java.util.Set<CategoryResponse> children;
 }

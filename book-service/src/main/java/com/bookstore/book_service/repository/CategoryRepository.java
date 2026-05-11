@@ -25,6 +25,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     // Check if category exists by slug
     boolean existsBySlug(String slug);
+    
+    // Check if any category has this parent
+    boolean existsByParentId(Long parentId);
 
     // Find top-level categories (no parent)
     @Query("SELECT c FROM Category c WHERE c.parent IS NULL ORDER BY c.name")

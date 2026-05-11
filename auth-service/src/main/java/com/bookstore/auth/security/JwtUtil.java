@@ -73,6 +73,19 @@ public class JwtUtil {
 
 
     private Claims getClaimsFromToken(String token) {
+        if (token == null) {
+            throw new IllegalArgumentException("JWT token is null");
+        }
+
+        // sanitize input
+        token = token.trim();
+
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+        token = token.trim();
+
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
