@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class RegisterRequest {
 
     public  String email;
-    public  String password;// TOm2023
+    public  String password;
     public String firstName;
     public String lastName;
     public String adminCode;

@@ -8,11 +8,13 @@ import com.bookstore.auth.model.User;
 import com.bookstore.auth.repository.UserRepository;
 import com.bookstore.auth.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -66,8 +68,27 @@ public class AuthService {
         return  new AuthResponse(token,UserResponse.fromUser(user));
     }
 
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserResponse.fromUser(user);
+    }
+
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserResponse.fromUser(user);
+    }
 
 
+    // send response to controller based on given token
+    public UserResponse getUserByToken(String token) {
+        // extract email from token
+        String email = jwtUtil.extractEmail(token);
+        log.info("email : {}", email);
+
+        return getUserByEmail(email);
+    }
 }
 
 
