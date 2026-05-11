@@ -22,7 +22,11 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     Page<Book> findByDeletedFalse(Pageable pageable);
 
     Optional<Book> findByIsbnAndDeletedFalse(String isbn);
-     Optional<Book> findByIdAndDeletedFalse(Long id);
+    Optional<Book> findByIdAndDeletedFalse(Long id);
+
+    // Check if any book is in this category
+    boolean existsByCategoriesIdAndDeletedFalse(Long categoryId);
+
     Page<Book> findByStatusAndDeletedFalse(BookStatus status, Pageable pageable);
 
     @Query("SELECT DISTINCT b FROM Book b WHERE b.deleted = false AND " +

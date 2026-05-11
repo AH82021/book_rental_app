@@ -28,7 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,11 +59,6 @@ public class BookServiceImpl implements BookService {
             throw new DuplicateResourceException("Book with ISBN " + request.getIsbn() + " already exists");
         }
 
-        // Validate categories if provided
-        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            validateCategories(request.getCategoryIds());
-        }
-
         // Set available copies to total copies if not provided
         if (request.getAvailableCopies() == null) {
             request.setAvailableCopies(request.getTotalCopies());
@@ -74,11 +72,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookMapper.toEntity(request);
 
         // Load and set categories
-        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            Set<Category> categories = categoryRepository.findAllById(request.getCategoryIds())
-                    .stream().collect(Collectors.toSet());
-            book.setCategories(categories);
-        }
+        Set<Category> categories = validateCategories(request.getCategoryIds());
+        book.setCategories(categories);
 
         Book savedBook = bookRepository.save(book);
         log.info("Created book with ID: {} and title: {}", savedBook.getId(), savedBook.getTitle());
@@ -121,11 +116,6 @@ public class BookServiceImpl implements BookService {
 
         Book existingBook = findBookByIdOrThrow(id);
 
-        // Validate categories if provided
-        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            validateCategories(request.getCategoryIds());
-        }
-
         // Validate inventory constraints
         if (request.getTotalCopies() != null && request.getAvailableCopies() != null) {
             if (request.getAvailableCopies() > request.getTotalCopies()) {
@@ -142,13 +132,8 @@ public class BookServiceImpl implements BookService {
 
         // Update categories if provided
         if (request.getCategoryIds() != null) {
-            if (request.getCategoryIds().isEmpty()) {
-                existingBook.getCategories().clear();
-            } else {
-                Set<Category> categories = categoryRepository.findAllById(request.getCategoryIds())
-                        .stream().collect(Collectors.toSet());
-                existingBook.setCategories(categories);
-            }
+            Set<Category> categories = validateCategories(request.getCategoryIds());
+            existingBook.setCategories(categories);
         }
 
         Book updatedBook = bookRepository.save(existingBook);
@@ -330,10 +315,7 @@ public class BookServiceImpl implements BookService {
         log.debug("Adding categories to book ID: {}", bookId);
 
         Book book = findBookByIdOrThrow(bookId);
-        validateCategories(categoryIds);
-
-        Set<Category> categoriesToAdd = categoryRepository.findAllById(categoryIds)
-                .stream().collect(Collectors.toSet());
+        Set<Category> categoriesToAdd = validateCategories(categoryIds);
 
         book.getCategories().addAll(categoriesToAdd);
 
@@ -420,7 +402,10 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new ResourceNotFoundException("Book not found with ID: " + id));
     }
 
-    private void validateCategories(Set<Long> categoryIds) {
+    private Set<Category> validateCategories(Set<Long> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return Collections.emptySet();
+        }
         List<Category> categories = categoryRepository.findAllById(categoryIds);
         if (categories.size() != categoryIds.size()) {
             Set<Long> foundIds = categories.stream().map(Category::getId).collect(Collectors.toSet());
@@ -429,5 +414,6 @@ public class BookServiceImpl implements BookService {
                     .collect(Collectors.toSet());
             throw new ResourceNotFoundException("Categories not found with IDs: " + notFoundIds);
         }
+        return new HashSet<>(categories);
     }
 }
